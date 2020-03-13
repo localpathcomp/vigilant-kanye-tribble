@@ -1,22 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kanye Rest</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanye Rest</title>
 </head>
+
 <body>
 
-  <h1>Kanye Rest Quotes</h1>
-  <p><em>The best from Kanye West</em></p>
-  <br>
-  <br>
-
-  <form action="/quote"><button>Get Quote</button></form>
-  
-  <br>
-
-  <a href="/sign-up"">Sign Up</a>  <a href="/login">Login</a>
-  
+    <h1>Kanye Rest Quotes</h1>
+    <h2></h2>
+    <p><em>The best from Kanye West</em></p>
+    <br>
+    <br>
+    <button onClick="addWisdom('/add', 'POST', quote)">Add</button>
+    <button onClick="getWisdom()">Get A New Quote</button>
+    <br>
+    <a href="/sign-up" ">Sign Up</a>  <a href="/login ">Login</a>
+  <script>
+    let quote = '';
+    function addWisdom(url = '', method = '', data = {}) {
+    async function fetchAdd(url, method, data) {
+        const response = await fetch(url, {
+            method: method,
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: JSON.stringify(data)
+        });
+        return await response.json();
+    };
+    fetchAdd(url, method, data)
+    .then((data) => {
+      if (data) {
+      } else {
+      }
+    });
+    }
+  function getWisdom() {
+    fetch('http://api.kanye.rest')
+    .then((response) => {
+    return response.json()
+    })
+    .then((data) => {
+      document.querySelector('h2').innerHTML = data.quote;
+      quote = {
+        quote: data.quote
+      }
+    }
+    )};
+    </script>
 </body>
 </html>

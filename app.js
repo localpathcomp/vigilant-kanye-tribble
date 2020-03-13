@@ -1,11 +1,9 @@
 const express = require('express')
-const request = require('request')
 const mysql = require('mysql')
 const app = express()
 const port = 3000
-const KanyeURL = 'http://api.kanye.rest'
-let currentQuote = ''
 app.use(express.urlencoded());
+app.use(express.json());
 const con = mysql.createConnection({
     host: 'localhost',
     user: process.env.DB_USER,
@@ -14,33 +12,16 @@ const con = mysql.createConnection({
 })
 con.connect(err => console.log(err))
 
-
-const getKanyeWrapper = (wisdom) => `
-<h1>${wisdom}</h1>
-<button onClick="addWisdom()">
-  Add
-</button>
-<button onClick="resetWisdom()">Get A New Quote</button>
-<script>function addWisdom(){ fetch('/add') };function resetWisdom(){fetch('${KanyeURL}').then((response) => {
-    return response.json()}).then((data) => {document.querySelector('h1').innerHTML = data.quote})}</script>
-`
-
-const getKanyeQuoteCallback = (response) => (err, res, body) => {
-    if (err) return console.log(err)
-    currentQuote = body.quote
-    response.send(getKanyeWrapper(body.quote))
-}
-
-const kanyeFetcher = (req, response) => {
-    const KanyeCallback = getKanyeQuoteCallback(response)
-
-    return request(KanyeURL, { json: true }, KanyeCallback)
-}
-
-const addQuote = (quote) => {
+const addQuote = (quote, res) => {
     const queryString = `insert into quotes(quote,created_at) values("${quote}", now());`
     con.query(queryString, (err, results, fields) => {
-        if (err) console.log(err)
+        if (err) {
+            console.log(err)
+            return;
+        } else {
+            res.status(200).send(`${JSON.stringify({success: results})}`)
+            return;
+        }
     })
 }
 
@@ -65,11 +46,8 @@ const createUser = (req, res) => {
 }
 app.get('/', (req, res) => { res.sendFile(__dirname + '/views/index.html') })
 
-app.get('/quote', kanyeFetcher)
-
-app.get('/add', (req, res) => {
-    addQuote(currentQuote)
-    res.sendStatus(200)
+app.post('/add', (req, res) => {
+    addQuote(req.body.quote, res)
 })
 
 app.get('/login', (req, res) => {
